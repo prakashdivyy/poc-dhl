@@ -34,7 +34,18 @@ app.post('/webhook/', function (req, res) {
         let sender = event.sender.id;
         if (event.message && event.message.text) {
             let text = event.message.text;
-            sendMessage.textMessage(sender, text);
+            if (text.toUpperCase() === "MENU"){
+              console.log("Commencing Menu");
+              sendMessage.generateMenu(sender);
+            } else {
+              console.log("Echo text");
+              sendMessage.textMessage(sender, text);
+            }
+        }
+        if (event.postback){
+          let payload = event.postback.payload;
+          console.log("Replying payload");
+          sendMessage.replyPayload(sender, payload);
         }
     }
     res.sendStatus(200)
