@@ -4,6 +4,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const request = require('request');
 const sendMessage = require('./send_message');
+const db = require('./db');
 const app = express();
 
 app.set('port', ( process.env.PORT || 5000));
@@ -32,21 +33,27 @@ app.post('/webhook/', function (req, res) {
     for (let i = 0; i < messaging_events.length; i++) {
         let event = req.body.entry[0].messaging[i];
         let sender = event.sender.id;
-        if (event.message && event.message.text) {
-            let text = event.message.text;
-            if (text.toUpperCase() === "MENU"){
-              console.log("Commencing Menu");
-              sendMessage.generateMenu(sender);
-            } else {
-              console.log("Echo text");
-              sendMessage.textMessage(sender, text);
-            }
-        }
-        if (event.postback){
-          let payload = event.postback.payload;
-          console.log("Replying payload");
-          sendMessage.replyPayload(sender, payload);
-        }
+        db.fetchState(sender, function(err, state){
+          if (event.message && event.message.text) {
+              let text = event.message.text;
+              if (text.toUpperCase() === "MENU"){
+                console.log("Commencing Menu");
+                sendMessage.generateMenu(sender);
+              } else if (state === "A2") {
+                console.log("Echo text");
+                sendMessage.textMessage(sender, "Here is the status of your belongings ... etc .. etc");
+              } else {
+                console.log("Echo text");
+                sendMessage.textMessage(sender, text);
+              }
+          } else if (event.postback){
+            let payload = event.postback.payload;
+            console.log("Replying payload");
+            sendMessage.replyPayload(sender, payload);
+          } else {
+            console.log("Event not recognized");
+          }
+        });
     }
     res.sendStatus(200)
 });

@@ -1,6 +1,7 @@
 'use strict';
 
 const request = require('request');
+const db = require('./db');
 
 module.exports = {
     textMessage: function (sender, msg) {
@@ -47,7 +48,7 @@ module.exports = {
                   title: "Open DHL Homepage"
                 }, {
                   type: "postback",
-                  title: "Check service",
+                  title: "Check Package Status",
                   payload: JSON.stringify({state: 'A1'}),
                 }],
               }]
@@ -75,7 +76,8 @@ module.exports = {
 
       // Replying state A1
       if (jsonPayload.state === "A1"){
-        this.textMessage(sender, "Here you can see a list of services provided by DHL Bot");
+        db.storeState(sender, "A2");
+        this.textMessage(sender, "Provide your receipt number here");
       }
     }
 };
