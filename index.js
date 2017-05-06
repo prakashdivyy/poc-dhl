@@ -42,6 +42,7 @@ app.post('/webhook/', function (req, res) {
               } else if (state === "A2") {
                 console.log("Echo text");
                 sendMessage.textMessage(sender, "Here is the status of your belongings ... etc .. etc");
+                sendMessage.generateConfirmationWindow(sender, 'Want to check another delivery?', 'A1', 'MENU');
               } else {
                 console.log("Echo text");
                 sendMessage.textMessage(sender, text);

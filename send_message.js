@@ -70,12 +70,55 @@ module.exports = {
       });
     },
 
+    generateConfirmationWindow: function(sender, optionMessage, yesState, noState){
+      let messageData = {
+        recipient:{
+          id: sender
+        },
+        message:{
+          attachment:{
+            type: "template",
+            payload:{
+              template_type: "button",
+              text: optionMessage,
+              buttons: [
+                {
+                  type:"postback",
+                  title: "Yes",
+                  payload: JSON.stringify({state: yesState}),
+                },
+                {
+                  type:"postback",
+                  title: "No",
+                  payload: JSON.stringify({state: noState}),
+                }
+              ]
+            }
+          }
+        }
+      };
+      request({
+          url: 'https://graph.facebook.com/v2.6/me/messages',
+          qs: {access_token: process.env.ACCESS_TOKEN},
+          method: 'POST',
+          json: messageData
+      }, function (error, response, body) {
+          if (error) {
+              console.log('Error sending messages: ', error)
+          } else if (response.body.error) {
+              console.log('Error: ', response.body.error)
+          }
+      });
+    },
+
     replyPayload: function(sender, payload) {
       // Parse payload strings to json
       let jsonPayload = JSON.parse(payload);
 
       // Replying state A1
-      if (jsonPayload.state === "A1"){
+      if (jsonPayload.state === "MENU") {
+        this.generateMenu(sender);
+      } else if (jsonPayload.state === "A1"){
         db.storeState(sender, "A2");
         this.textMessage(sender, "Provide your receipt number here");
       }
